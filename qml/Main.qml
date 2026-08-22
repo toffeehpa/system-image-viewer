@@ -15,6 +15,31 @@ Window {
         model.openFile(url)
     }
 
+    NormalWindow {
+        id: normalWindow
+        visible: false
+    }
+
+    function switchToNormalWindow() {
+        const src = viewer.imageView.sourcePixelSize
+        const maxW = Screen.width * 0.9
+        const maxH = Screen.height * 0.9
+
+        let w = src.width
+        let h = src.height
+        if (w > maxW || h > maxH) {
+            const k = Math.min(maxW / w, maxH / h)
+            w *= k
+            h *= k
+        }
+
+        normalWindow.width = Math.round(w)
+        normalWindow.height = Math.round(h)
+        normalWindow.imageModel = model
+        normalWindow.visible = true
+        Qt.callLater(() => { root.visible = false })
+    }
+
     ImageModel {
         id: model
     }
@@ -22,57 +47,29 @@ Window {
     Item {
         id: content
         anchors.fill: parent
-        focus: true
-
-        readonly property var testImages: [
-            "qrc:/qt/qml/SystemImageViewer/qml/assets/test-image.png",
-            "qrc:/qt/qml/SystemImageViewer/qml/assets/mafuyu.webp"
-        ]
-        property int testIndex: 0
-        // todo: подогнать под реальную высоту filmstrip, когда он появится
-        property real filmstripReserve: 120
-
-        readonly property bool useModel: model.count > 0
-        readonly property url activeSource: useModel
-            ? model.currentSource
-            : testImages[testIndex]
-
-        Keys.onEscapePressed: Qt.quit()
-        Keys.onLeftPressed: {
-            if (useModel) model.previous()
-            else testIndex = (testIndex - 1 + testImages.length) % testImages.length
-        }
-        Keys.onRightPressed: {
-            if (useModel) model.next()
-            else testIndex = (testIndex + 1) % testImages.length
-        }
-        Keys.onPressed: (event) => {
-            if (event.key === Qt.Key_1) {
-                picture.toggleFitActual()
-                event.accepted = true
-            }
-        }
-
+        // На этом месте отсюда было вынесено пару функций в Viewer.qml, само собой для оптимизации и для упрощения разработкию
         Rectangle {
             anchors.fill: parent
             color: "black"
             opacity: 0.6
+
+            MouseArea {
+                anchors.fill: parent
+                onClicked: root.switchToNormalWindow()
+            }
         }
 
-        ImageView {
-            id: picture
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: content.filmstripReserve
-            source: content.activeSource
+        Viewer {
+            id: viewer
+            anchors.fill: parent
+            imageModel: model
+            quitOnEscape: true
         }
 
         Shortcut {
             sequence: "Ctrl+Alt+Shift+T"
             context: Qt.ApplicationShortcut
-            onActivated: content.testIndex = 0
+            onActivated: viewer.testIndex = 0
         }
     }
 }
