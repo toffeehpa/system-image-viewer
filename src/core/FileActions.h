@@ -1,13 +1,19 @@
-//
-// Created by angely on 8/21/26.
-//
+#pragma once
 
-#ifndef SYSTEM_IMAGE_VIEWER_FILEACTIONS_H
-#define SYSTEM_IMAGE_VIEWER_FILEACTIONS_H
+#include <QObject>
+#include <QQmlEngine>
+#include <QUrl>
 
+class FileActions : public QObject
+{
+    Q_OBJECT
+    QML_ELEMENT
+    QML_SINGLETON
 
-class FileActions {
+public:
+    explicit FileActions(QObject *parent = nullptr) : QObject(parent) {}
+
+public slots:
+    void copyToClipboard(const QUrl &fileUrl);
+    void locateOnDisk(const QUrl &fileUrl);
 };
-
-
-#endif //SYSTEM_IMAGE_VIEWER_FILEACTIONS_H

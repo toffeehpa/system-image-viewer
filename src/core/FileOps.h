@@ -1,13 +1,8 @@
-//
-// Created by angely on 8/21/26.
-//
+#pragma once
 
-#ifndef SYSTEM_IMAGE_VIEWER_FILEOPS_H
-#define SYSTEM_IMAGE_VIEWER_FILEOPS_H
+#include <QUrl>
 
-
-class FileOps {
-};
-
-
-#endif //SYSTEM_IMAGE_VIEWER_FILEOPS_H
+namespace FileOps {
+    void copyToClipboard(const QUrl &fileUrl);
+    void locateOnDisk(const QUrl &fileUrl);
+}
