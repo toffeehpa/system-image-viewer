@@ -11,7 +11,7 @@ Item {
     property real fitScale: 1
     property bool useNativeContextMenu: false
 
-    // память зума/пана — по каждому файлу отдельно
+    // память позиции файлов
     property var perImageState: ({})
     property bool currentAdjusted: false
     property string currentKey: ""
