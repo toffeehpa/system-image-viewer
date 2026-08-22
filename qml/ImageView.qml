@@ -9,7 +9,8 @@ Item {
     readonly property real minScale: 0.1
     readonly property real maxScale: 8.0
     property real fitScale: 1
-    property bool useNativeContextMenu: false
+
+    signal locateOnDiskRequested(url fileUrl)
 
     // память позиции файлов
     property var perImageState: ({})
@@ -141,23 +142,28 @@ Item {
         anchors.fill: parent
         acceptedButtons: Qt.RightButton
         onClicked: (mouse) => {
-            if (imageView.useNativeContextMenu) {
-                const globalPos = mapToGlobal(mouse.x, mouse.y)
-                NativeContextMenu.show(image.source, globalPos.x, globalPos.y)
-            } else {
-                contextMenu.popup(mouse.x, mouse.y, [
-                    { text: "Copy", onTriggered: () => FileActions.copyToClipboard(image.source) },
-                    { separator: true },
-                    { text: "Quick edit", enabled: false },
-                    { text: "Locate on disk", onTriggered: () => FileActions.locateOnDisk(image.source) }
-                ])
-            }
+            contextMenu.x = mouse.x
+            contextMenu.y = mouse.y
+            contextMenu.open()
         }
     }
 
-    ContextMenu {
+    Menu {
         id: contextMenu
-        visible: !imageView.useNativeContextMenu && contextMenu.visible
+
+        MenuItem {
+            text: "Copy"
+            onTriggered: FileActions.copyToClipboard(image.source)
+        }
+        MenuSeparator {}
+        MenuItem {
+            text: "Quick edit"
+            enabled: false
+        }
+        MenuItem {
+            text: "Locate on disk"
+            onTriggered: imageView.locateOnDiskRequested(image.source)
+        }
     }
 
     PinchArea {

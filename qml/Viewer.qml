@@ -33,6 +33,15 @@ Item {
         onPointChanged: viewerRoot.cursorY = point.position.y
     }
 
+    signal locateOnDiskRequested(url fileUrl)
+
+    Connections {
+        target: picture
+        function onLocateOnDiskRequested(fileUrl) {
+            viewerRoot.locateOnDiskRequested(fileUrl)
+        }
+    }
+
     Keys.onEscapePressed: if (quitOnEscape) Qt.quit()
     Keys.onLeftPressed: {
         if (useModel) imageModel.previous()
@@ -65,7 +74,6 @@ Item {
         id: picture
         anchors.fill: parent
         source: viewerRoot.activeSource
-        useNativeContextMenu: viewerRoot.useNativeContextMenu
     }
 
     Text {

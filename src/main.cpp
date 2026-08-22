@@ -1,4 +1,4 @@
-#include <QApplication>
+#include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QSurfaceFormat>
 #include <QUrl>
@@ -6,7 +6,8 @@
 
 int main(int argc, char *argv[])
 {
-    QApplication app(argc, argv);
+    QCoreApplication::addLibraryPath(QCoreApplication::applicationDirPath() + "/plugins");
+    QGuiApplication app(argc, argv);
     app.setApplicationName(QStringLiteral("System Viewer"));
     app.setOrganizationName(QStringLiteral("system-image-viewer"));
 

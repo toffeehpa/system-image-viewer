@@ -4,13 +4,12 @@
 #include <QFileInfo>
 
 namespace {
-    // todo: расширить/вынести в конфиг, когда появится плагинный backend форматов
     const QStringList kImageFilters = {
         "*.png", "*.jpg", "*.jpeg", "*.bmp", "*.gif", "*.webp", "*.svg"
     };
 }
 
-ImageModel::ImageModel(QObject *parent) : QObject(parent) {}
+ImageModel::ImageModel(QObject *parent) : QAbstractListModel(parent) {}
 
 QUrl ImageModel::currentSource() const
 {
@@ -29,6 +28,37 @@ int ImageModel::count() const
     return m_files.size();
 }
 
+int ImageModel::rowCount(const QModelIndex &parent) const
+{
+    if (parent.isValid())
+        return 0;
+    return m_files.size();
+}
+
+QVariant ImageModel::data(const QModelIndex &index, int role) const
+{
+    if (!index.isValid() || index.row() < 0 || index.row() >= m_files.size())
+        return {};
+
+    const QString &path = m_files.at(index.row());
+    switch (role) {
+    case FileUrlRole:
+        return QUrl::fromLocalFile(path);
+    case FileNameRole:
+        return QFileInfo(path).fileName();
+    default:
+        return {};
+    }
+}
+
+QHash<int, QByteArray> ImageModel::roleNames() const
+{
+    return {
+        { FileUrlRole, "fileUrl" },
+        { FileNameRole, "fileName" }
+    };
+}
+
 void ImageModel::openFile(const QUrl &fileUrl)
 {
     const QString path = fileUrl.toLocalFile();
@@ -45,9 +75,11 @@ void ImageModel::loadDirectory(const QString &filePath)
 
     const QStringList entries = dir.entryList(kImageFilters, QDir::Files | QDir::NoDotAndDotDot, QDir::Name);
 
+    beginResetModel();
     m_files.clear();
     for (const QString &name : entries)
         m_files << dir.absoluteFilePath(name);
+    endResetModel();
 
     m_index = m_files.indexOf(info.absoluteFilePath());
     if (m_index < 0 && !m_files.isEmpty())
@@ -55,7 +87,6 @@ void ImageModel::loadDirectory(const QString &filePath)
 
     emit countChanged();
     emit currentIndexChanged();
-    emit currentSourceChanged();
 }
 
 void ImageModel::next()
@@ -64,7 +95,6 @@ void ImageModel::next()
         return;
     m_index = (m_index + 1) % m_files.size();
     emit currentIndexChanged();
-    emit currentSourceChanged();
 }
 
 void ImageModel::previous()
@@ -73,5 +103,12 @@ void ImageModel::previous()
         return;
     m_index = (m_index - 1 + m_files.size()) % m_files.size();
     emit currentIndexChanged();
-    emit currentSourceChanged();
+}
+
+void ImageModel::setCurrentIndex(int index)
+{
+    if (index < 0 || index >= m_files.size() || index == m_index)
+        return;
+    m_index = index;
+    emit currentIndexChanged();
 }

@@ -26,12 +26,12 @@ void FileActions::locateOnDisk(const QUrl &fileUrl)
     if (path.isEmpty())
         return;
 
-    // сначала пробуем Dolphin с выделением конкретного файла
+    // Dolphin
     if (QProcess::startDetached(QStringLiteral("dolphin"),
             { QStringLiteral("--select"), path }))
         return;
 
-    // фолбэк для систем без Dolphin (FreeBSD, другие DE) — просто открыть папку
+    // фолбэк
     const QFileInfo info(path);
     QDesktopServices::openUrl(QUrl::fromLocalFile(info.absolutePath()));
 }
